@@ -37,6 +37,7 @@ RUN curl --fail --location --silent --show-error "https://download.gocd.org/bina
     mv -v /go-agent-23.5.0/wrapper/wrapper.jar /go-agent/wrapper/ && \
     chown -R ${UID}:0 /go-agent && chmod -R g=u /go-agent
 
+
 FROM docker.io/docker:dind
 ARG TARGETARCH
 
@@ -65,6 +66,18 @@ RUN \
   adduser -D -u ${UID} -s /bin/bash -G root go && \
   apk add --no-cache git openssh-client bash curl procps && \
   apk add --no-cache sudo && \
+  apk add --update nodejs npm && \
+  apk add openjdk11 && \
+  apk add maven && \
+  apk add --no-cache python3 py3-pip && \
+  apk add --upgrade pipx && \
+  apk add gcc python3-dev musl-dev linux-headers && \
+  pipx install pipenv && \
+  pipx install dbt-core && \
+  pipx install pytest && \
+  curl -LO https://storage.googleapis.com/kubernetes-release/release/$(curl -s https://storage.googleapis.com/kubernetes-release/release/stable.txt)/bin/linux/amd64/kubectl  && \
+  chmod +x ./kubectl && \
+  mv ./kubectl /usr/local/bin && \
   rm -rf /lib/libudev.so* && \
   # install glibc/zlib for the Tanuki Wrapper, and use by glibc-linked Adoptium JREs && \
     apk add --no-cache tzdata --virtual .build-deps curl binutils zstd && \
@@ -113,4 +126,4 @@ RUN chown -R go:root /docker-entrypoint.d /go /godata /docker-entrypoint.sh && \
 
 ENTRYPOINT ["/docker-entrypoint.sh"]
 
-USER go
+USER root
